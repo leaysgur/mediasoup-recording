@@ -1,0 +1,17 @@
+{
+  "name": "poc-mediasoup-recording",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev:client": "webpack-dev-server",
+    "build:client": "webpack --mode=production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.39.0",
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.7.2"
+  }
+}
