@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "nodemon -w ./lib ./main.js"
+    "dev": "nodemon -w ./main.js -w ./lib ./main.js"
   },
   "keywords": [],
   "author": "",

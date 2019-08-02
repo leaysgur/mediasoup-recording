@@ -36,16 +36,13 @@ const Room = require("./lib/room");
   const httpServer = http.createServer();
   const wsServer = new WebSocketServer(httpServer);
 
-  wsServer.on("connectionrequest", (info, accept) => {
-    console.log(info.socket.remoteAddress, info.origin);
+  wsServer.on("connectionrequest", (info, accept, reject) => {
+    const params = new URLSearchParams(info.request.url.split("?")[1]);
+    const peerId = params.get("peerId");
 
-    // TODO: get peerId
+    if (!peerId) return reject(new Error("Invalid peer id!"));
 
-    room.handlePeerConnect({
-      // to be more and more strict
-      peerId: `p${String(Math.random()).slice(2)}`,
-      protooWebSocketTransport: accept()
-    });
+    room.handlePeerConnect(peerId, accept());
   });
 
   httpServer.listen(2345, "127.0.0.1", () => {
