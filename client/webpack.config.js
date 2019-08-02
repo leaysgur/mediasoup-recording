@@ -6,14 +6,14 @@ const config = {
   devtool: false,
   context: rootPath,
   entry: {
-    app: "./client/src/main.js"
+    app: "./src/main.js"
   },
   output: {
-    path: `${rootPath}/client`,
+    path: `${rootPath}/`,
     filename: "bundle.js"
   },
   devServer: {
-    contentBase: `${rootPath}/client`,
+    contentBase: `${rootPath}/`,
     watchContentBase: true,
     host: "0.0.0.0",
     port: 9000,
