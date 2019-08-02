@@ -1,15 +1,15 @@
 export const onLoad = (
   _,
-  { $micMute, $micUnmute, $recStart, $recStop },
+  { $micMute, $micUnmute, $roomJoin, $roomLeave, $recStart, $recStop },
   logger
 ) => {
   logger.log("loaded");
-  $micMute.disabled = $micUnmute.disabled = $recStart.disabled = $recStop.disabled = true;
+  $micMute.disabled = $micUnmute.disabled = $roomJoin.disabled = $roomLeave.disabled = $recStart.disabled = $recStop.disabled = true;
 };
 
 export const onClickMicCapture = async (
   state,
-  { $micCapture, $micMute, $micUnmute, $recStart },
+  { $micCapture, $micMute, $micUnmute, $roomJoin },
   logger
 ) => {
   logger.log("capture mic.");
@@ -20,7 +20,7 @@ export const onClickMicCapture = async (
 
   state.track = stream.getTracks()[0];
   $micCapture.disabled = true;
-  $recStart.disabled = false;
+  $roomJoin.disabled = false;
 
   $micMute.disabled = state.muted;
   $micUnmute.disabled = !state.muted;
@@ -46,20 +46,61 @@ export const onClickMicUnmute = (state, { $micMute, $micUnmute }, logger) => {
   $micUnmute.disabled = !state.muted;
 };
 
-export const onClickRecStart = (state, { $recStart, $recStop }, logger) => {
+export const onClickRoomJoin = (
+  state,
+  { $roomJoin, $roomLeave, $recStart },
+  logger
+) => {
+  logger.log("join");
+
+  state.joined = true;
+
+  $roomJoin.disabled = state.joined;
+  $roomLeave.disabled = !state.joined;
+
+  $recStart.disabled = !state.joined;
+};
+export const onClickRoomLeave = (
+  state,
+  { $roomJoin, $roomLeave, $recStart },
+  logger
+) => {
+  logger.log("leave");
+
+  state.joined = false;
+
+  $roomJoin.disabled = state.joined;
+  $roomLeave.disabled = !state.joined;
+
+  $recStart.disabled = !state.joined;
+};
+
+export const onClickRecStart = (
+  state,
+  { $recStart, $recStop, $roomLeave },
+  logger
+) => {
   logger.log("start recording");
 
   state.recording = true;
 
   $recStart.disabled = state.recording;
   $recStop.disabled = !state.recording;
+
+  $roomLeave.disabled = state.recording;
 };
 
-export const onClickRecStop = (state, { $recStart, $recStop }, logger) => {
+export const onClickRecStop = (
+  state,
+  { $recStart, $recStop, $roomLeave },
+  logger
+) => {
   logger.log("stop recording");
 
   state.recording = false;
 
   $recStart.disabled = state.recording;
   $recStop.disabled = !state.recording;
+
+  $roomLeave.disabled = state.recording;
 };
