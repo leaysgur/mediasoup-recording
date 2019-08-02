@@ -2,9 +2,64 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recording PoC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+  <link rel="stylesheet" href="./app.css">
 </head>
 <body>
+  <section class="hero is-primary is-info is-bold">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">Recording PoC</h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="tile is-ancestor">
+
+      <div class="tile is-4 is-vertical is-parent">
+        <div class="tile is-child box">
+          <h2 class="title">Setup</h2>
+          <div class="content">
+            <button class="button">capture mic.</button>
+            <div class="select">
+              <select disabled>
+                <option>default</option>
+              </select>
+            </div>
+          </div>
+          <div class="content">
+            <canvas></canvas>
+          </div>
+          <div class="content">
+            <button class="button" disabled>mute</button>
+            <button class="button" disabled>unmute</button>
+          </div>
+        </div>
+
+        <div class="tile is-child box">
+          <h2 class="title">Record</h2>
+          <div class="content">
+            <button class="button" disabled>start</button>
+            <button class="button" disabled>stop</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile is-parent">
+        <div class="tile is-child box">
+          <h2 class="title">Logs</h2>
+          <div class="content">
+            <pre></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <script src="./bundle.js"></script>
 </body>
 </html>
