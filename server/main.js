@@ -1,24 +1,22 @@
 const http = require("http");
-const { WebSocketServer } = require("protoo-server");
 const mediasoup = require("mediasoup");
-// const ConfRoom = require("./lib/Room");
-
-class ConfRoom {
-  handlePeerConnect() {}
-  getStatus() {}
-}
+const { WebSocketServer } = require("protoo-server");
+const Room = require("./lib/room");
 
 (async () => {
+  console.log("create single mediasoup worker");
   const worker = await mediasoup.createWorker({
     rtcMinPort: 3000,
     rtcMaxPort: 4000
   });
 
-  worker.on("died", () => {
+  worker.once("died", () => {
     console.log("mediasoup Worker died, exit..");
     process.exit(1);
   });
 
+  console.log("create router accepts audio only");
+  // audio only
   const router = await worker.createRouter({
     mediaCodecs: [
       {
@@ -31,20 +29,17 @@ class ConfRoom {
     ]
   });
 
-  const room = new ConfRoom(router);
+  console.log("create room");
+  const room = new Room(router);
 
+  console.log("create http, ws servers");
   const httpServer = http.createServer();
-  await new Promise(resolve => {
-    httpServer.listen(2345, "127.0.0.1", resolve);
-  });
-
   const wsServer = new WebSocketServer(httpServer);
+
   wsServer.on("connectionrequest", (info, accept) => {
-    console.log(
-      "protoo connection request [peerId:%s, address:%s, origin:%s]",
-      info.socket.remoteAddress,
-      info.origin
-    );
+    console.log(info.socket.remoteAddress, info.origin);
+
+    // TODO: get peerId
 
     room.handlePeerConnect({
       // to be more and more strict
@@ -53,6 +48,7 @@ class ConfRoom {
     });
   });
 
-  console.log("websocket server started on http://127.0.0.1:2345");
-  setInterval(() => console.log("room stat", room.getStatus()), 1000 * 5);
+  httpServer.listen(2345, "127.0.0.1", () => {
+    console.log("server started", httpServer.address());
+  });
 })();
