@@ -46,12 +46,18 @@ export const onClickMicUnmute = (state, { $micMute, $micUnmute }, logger) => {
   $micUnmute.disabled = !state.muted;
 };
 
-export const onClickRoomJoin = (
+export const onClickRoomJoin = async (
   state,
   { $roomJoin, $roomLeave, $recStart },
   logger
 ) => {
   logger.log("join");
+
+  try {
+    await state.room.join(state.track);
+  } catch (err) {
+    return logger.error(err);
+  }
 
   state.joined = true;
 
