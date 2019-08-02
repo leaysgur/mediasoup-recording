@@ -1,47 +1,20 @@
-const onClickMicCapture = async (
-  state,
-  { $micCapture, $micMute, $micUnmute },
-  logger
-) => {
-  logger.log("capture mic.");
-
-  const stream = await navigator.mediaDevices
-    .getUserMedia({ audio: true })
-    .catch(err => logger.error(err.toString()));
-
-  state.track = stream.getTracks()[0];
-  $micCapture.disabled = true;
-
-  $micMute.disabled = state.muted;
-  $micUnmute.disabled = !state.muted;
-};
-
-const onClickMicMute = (state, { $micMute, $micUnmute }, logger) => {
-  logger.log(`Mic. muted`);
-
-  state.muted = true;
-
-  state.track.enabled = !state.muted;
-  $micMute.disabled = state.muted;
-  $micUnmute.disabled = !state.muted;
-};
-const onClickMicUnmute = (state, { $micMute, $micUnmute }, logger) => {
-  logger.log(`Mic. unmuted`);
-
-  state.muted = false;
-
-  state.track.enabled = !state.muted;
-  $micMute.disabled = state.muted;
-  $micUnmute.disabled = !state.muted;
-};
+import {
+  onLoad,
+  onClickMicCapture,
+  onClickMicMute,
+  onClickMicUnmute,
+  onClickRecStart,
+  onClickRecStop
+} from "./handlers";
 
 (async () => {
   const state = {
     track: null, // MediaStreamTrack to record
-    muted: false // track is enabled or NOT
+    muted: false, // track is enabled or NOT
+    recording: false // recording or NOT
   };
 
-  const $els = {
+  const els = {
     $micCapture: document.getElementById("mic-capture"),
     $micMute: document.getElementById("mic-mute"),
     $micUnmute: document.getElementById("mic-unmute"),
@@ -53,16 +26,19 @@ const onClickMicUnmute = (state, { $micMute, $micUnmute }, logger) => {
   const logger = {
     log(data) {
       console.log(data);
-      $els.$evLogs.textContent += `${data}\n`;
+      const time = new Date().toLocaleTimeString();
+      els.$evLogs.textContent += `${time}: ${data}\n`;
     },
     error(err) {
       console.error(err);
     }
   };
 
-  $els.$micMute.disabled = $els.$micUnmute.disabled = $els.$recStart.disabled = $els.$recStop.disabled = true;
-
-  $els.$micCapture.onclick = () => onClickMicCapture(state, $els, logger);
-  $els.$micMute.onclick = () => onClickMicMute(state, $els, logger);
-  $els.$micUnmute.onclick = () => onClickMicUnmute(state, $els, logger);
+  // attach handlers
+  onLoad(state, els, logger);
+  els.$micCapture.onclick = () => onClickMicCapture(state, els, logger);
+  els.$micMute.onclick = () => onClickMicMute(state, els, logger);
+  els.$micUnmute.onclick = () => onClickMicUnmute(state, els, logger);
+  els.$recStart.onclick = () => onClickRecStart(state, els, logger);
+  els.$recStop.onclick = () => onClickRecStop(state, els, logger);
 })();
