@@ -15,7 +15,6 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
-    "mediasoup-client": "^3.2.0",
-    "protoo-client": "^4.0.3"
+    "mediasoup-client": "^3.2.0"
   }
 }
