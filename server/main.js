@@ -1,10 +1,10 @@
-const http = require("http");
+const createFastify = require("fastify");
 const mediasoup = require("mediasoup");
-const { WebSocketServer } = require("protoo-server");
-const Room = require("./lib/room");
+const formBody = require("fastify-formbody");
+const cors = require("fastify-cors");
+const recordRoute = require("./lib/record");
 
 (async () => {
-  console.log("create single mediasoup worker");
   const worker = await mediasoup.createWorker({
     rtcMinPort: 3000,
     rtcMaxPort: 4000
@@ -15,7 +15,6 @@ const Room = require("./lib/room");
     process.exit(1);
   });
 
-  console.log("create router accepts audio only");
   // audio only
   const router = await worker.createRouter({
     mediaCodecs: [
@@ -29,23 +28,26 @@ const Room = require("./lib/room");
     ]
   });
 
-  console.log("create room");
-  const room = new Room(router);
+  const fastify = createFastify();
 
-  console.log("create http, ws servers");
-  const httpServer = http.createServer();
-  const wsServer = new WebSocketServer(httpServer);
-
-  wsServer.on("connectionrequest", (info, accept, reject) => {
-    const params = new URLSearchParams(info.request.url.split("?")[1]);
-    const peerId = params.get("peerId");
-
-    if (!peerId) return reject(new Error("Invalid peer id!"));
-
-    room.handlePeerConnect(peerId, accept());
+  fastify.register(cors);
+  fastify.register(formBody);
+  fastify.decorate("$state", {
+    router,
+    // Map<transportId, Transport>
+    transports: new Map(),
+    // Map<producerId, Producer>
+    producers: new Map()
   });
 
-  httpServer.listen(2345, "127.0.0.1", () => {
-    console.log("server started", httpServer.address());
+  fastify.register(recordRoute);
+
+  fastify.listen(2345, "127.0.0.1", (err, address) => {
+    if (err) {
+      console.log("server creation failed, exit..");
+      process.exit(1);
+    }
+
+    console.log(`server listening on ${address}`);
   });
 })();
