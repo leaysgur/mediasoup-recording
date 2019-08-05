@@ -10,6 +10,7 @@ const recordRoute = require("./lib/routes/record");
   const serverPort = 2345;
   const recMinPort = 4001;
   const recMaxPort = 5000;
+  const recordDir = "./record";
 
   const worker = await mediasoup.createWorker({
     rtcMinPort: 3001,
@@ -43,7 +44,8 @@ const recordRoute = require("./lib/routes/record");
     serverIp,
     serverPort,
     recMinPort,
-    recMaxPort
+    recMaxPort,
+    recordDir
   });
   // TODO: detect missing transport and producer(eg. client disappear)
   fastify.decorate("$state", {
