@@ -52,7 +52,4 @@ import {
 
   console.warn(state, context);
   onLoad(state, els, context);
-
-  // debug
-  await onClickMicCapture(state, els, context);
 })();

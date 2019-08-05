@@ -1,13 +1,11 @@
 export const onLoad = async (
   state,
   { $micMute, $micUnmute, $recStart, $recStop },
-  { logger, client }
+  { logger }
 ) => {
   logger.log("loaded");
 
   $micMute.disabled = $micUnmute.disabled = $recStart.disabled = $recStop.disabled = true;
-
-  await client.setup();
 };
 
 export const onClickMicCapture = async (

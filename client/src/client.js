@@ -6,23 +6,17 @@ export default class Client extends EventEmitter {
     super();
 
     this._recorder = recorder;
-    this._device = new Device();
+    this._device = null;
     this._sendTransport = null;
     this._producer = null;
-  }
-
-  async setup() {
-    console.warn("client.setup()");
-    const routerRtpCapabilities = await this._recorder
-      .getCapabilities()
-      .catch(console.error);
-    await this._device.load({ routerRtpCapabilities }).catch(console.error);
-    console.warn(routerRtpCapabilities);
   }
 
   async start(track) {
     console.warn("start()", track);
 
+    if (this._device === null) {
+      await this._setup();
+    }
     if (this._sendTransport === null) {
       await this._connectTransport();
     }
@@ -45,6 +39,17 @@ export default class Client extends EventEmitter {
     this._producer = null;
 
     console.warn("stopped");
+  }
+
+  async _setup() {
+    this._device = new Device();
+
+    const routerRtpCapabilities = await this._recorder
+      .getCapabilities()
+      .catch(console.error);
+    await this._device.load({ routerRtpCapabilities }).catch(console.error);
+
+    console.warn(routerRtpCapabilities);
   }
 
   async _connectTransport() {
