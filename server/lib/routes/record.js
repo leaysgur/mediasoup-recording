@@ -1,3 +1,5 @@
+const spawnGStreamer = require("../gstreamer");
+
 module.exports = async (fastify, options, done) => {
   const { serverIp } = fastify.$config;
   const { router, transports, producerItems } = fastify.$state;
@@ -61,6 +63,12 @@ module.exports = async (fastify, options, done) => {
 
     console.log("rtpTransport created on", rtpTransport.tuple);
 
+    const ps = spawnGStreamer(
+      rtpTransport.tuple.localPort,
+      `./files/${producer.id}.ogg`
+    );
+    console.log("recording process spawned", ps.pid);
+
     const consumer = await rtpTransport
       .consume({
         producerId: producer.id,
@@ -70,7 +78,7 @@ module.exports = async (fastify, options, done) => {
 
     console.log(`consumer created with id ${consumer.id}`);
 
-    producerItems.set(producer.id, [producer, rtpTransport, consumer]);
+    producerItems.set(producer.id, [producer, rtpTransport, consumer, ps]);
 
     return { id: producer.id };
   });
@@ -82,13 +90,16 @@ module.exports = async (fastify, options, done) => {
     if (!producerItem)
       throw new Error(`producerItem with id "${producerId}" not found`);
 
-    const [producer, rtpTransport, consumer] = producerItem;
+    const [producer, rtpTransport, consumer, ps] = producerItem;
     producer.close();
     console.log(`producer closed with id ${producerId}`);
     rtpTransport.close();
     console.log("rtpTransport closed on", rtpTransport.tuple);
     consumer.close();
     console.log(`consumer closed with id ${consumer.id}`);
+    ps.kill();
+    console.log(`process killed with id ${ps.pid}`);
+
     producerItems.delete(producerId);
 
     return {};
