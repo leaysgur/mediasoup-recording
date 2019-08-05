@@ -23,6 +23,7 @@ import {
     $micUnmute: document.getElementById("mic-unmute"),
     $recStart: document.getElementById("rec-start"),
     $recStop: document.getElementById("rec-stop"),
+    $recAudio: document.getElementById("rec-audio"),
     $evLogs: document.getElementById("ev-logs")
   };
 

@@ -37,6 +37,15 @@ export default class Record {
     return res;
   }
 
+  async consume(body) {
+    console.warn("recorder.consume()", body);
+    const res = await this._fetch("/record/consume", {
+      method: "POST",
+      body
+    });
+    return res;
+  }
+
   async stop(body) {
     console.warn("recorder.stop()", body);
     await this._fetch("/record/stop", {

@@ -1,14 +1,13 @@
-import { EventEmitter } from "events";
 import { Device } from "mediasoup-client";
 
-export default class Client extends EventEmitter {
+export default class Client {
   constructor(recorder) {
-    super();
-
     this._recorder = recorder;
     this._device = null;
     this._sendTransport = null;
+    this._recvTransport = null;
     this._producer = null;
+    this._consumer = null;
   }
 
   async start(track) {
@@ -20,23 +19,42 @@ export default class Client extends EventEmitter {
     if (this._sendTransport === null) {
       await this._connectSendTransport();
     }
+    if (this._recvTransport === null) {
+      await this._connectRecvTransport();
+    }
 
-    const audioProducer = await this._sendTransport
+    // sending
+    this._producer = await this._sendTransport
       .produce({ track })
       .catch(console.error);
-    console.warn(audioProducer);
+    console.warn(this._producer);
 
-    this._producer = audioProducer;
+    // recving to preview
+    const info = await this._recorder
+      .consume({
+        producerId: this._producer.id,
+        transportId: this._recvTransport.id
+      })
+      .catch(console.error);
+    this._consumer = await this._recvTransport
+      .consume(info)
+      .catch(console.error);
+    console.warn(this._consumer);
+
+    return this._consumer;
   }
 
   async stop() {
     console.warn("client.stop()");
     this._producer.close();
+    this._consumer.close();
 
     await this._recorder
       .stop({ producerId: this._producer.id })
       .catch(console.error);
+
     this._producer = null;
+    this._consumer = null;
 
     console.warn("stopped");
   }
@@ -89,6 +107,31 @@ export default class Client extends EventEmitter {
           callback({ id });
         } catch (err) {
           console.error(err);
+          errback(err);
+        }
+      }
+    );
+  }
+  async _connectRecvTransport() {
+    const transportInfo = await this._recorder
+      .createTransport()
+      .catch(console.error);
+
+    transportInfo.iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
+    this._recvTransport = this._device.createRecvTransport(transportInfo);
+    console.warn(this._recvTransport);
+
+    this._recvTransport.on(
+      "connect",
+      async ({ dtlsParameters }, callback, errback) => {
+        console.warn("client.recvTransport.on(connect)");
+        try {
+          await this._recorder.connectTransport({
+            transportId: this._recvTransport.id,
+            dtlsParameters
+          });
+          callback();
+        } catch (err) {
           errback(err);
         }
       }
