@@ -17,6 +17,7 @@ export default class Client extends EventEmitter {
       .getCapabilities()
       .catch(console.error);
     await this._device.load({ routerRtpCapabilities }).catch(console.error);
+    console.warn(routerRtpCapabilities);
   }
 
   async start(track) {
@@ -27,6 +28,7 @@ export default class Client extends EventEmitter {
 
     transportInfo.iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
     this._sendTransport = this._device.createSendTransport(transportInfo);
+    console.warn(this._sendTransport);
 
     this._sendTransport.on(
       "connect",
@@ -55,6 +57,7 @@ export default class Client extends EventEmitter {
           });
           callback({ id });
         } catch (err) {
+          console.error(err);
           errback(err);
         }
       }
@@ -63,6 +66,7 @@ export default class Client extends EventEmitter {
     const audioProducer = await this._sendTransport
       .produce({ track })
       .catch(console.error);
+    console.warn(audioProducer);
 
     this._producer = audioProducer;
   }
@@ -74,5 +78,6 @@ export default class Client extends EventEmitter {
     await this._recorder
       .stop({ producerId: this._producer.id })
       .catch(console.error);
+    console.warn("stopped");
   }
 }

@@ -7,7 +7,7 @@ export default class Record {
     console.warn("recorder.getCapabilities()");
     const routerRtpCapabilities = await this._fetch("/record/capabilities", {
       method: "GET"
-    }).then(res => res.json());
+    });
     return routerRtpCapabilities;
   }
 
@@ -19,16 +19,17 @@ export default class Record {
     return transportInfo;
   }
 
-  async connectTransport() {
-    console.warn("recorder.connectTransport()");
+  async connectTransport(body) {
+    console.warn("recorder.connectTransport()", body);
     await this._fetch("/record/transport/connect", {
-      method: "POST"
+      method: "POST",
+      body
     });
     return null;
   }
 
   async start(body) {
-    console.warn("recorder.start()");
+    console.warn("recorder.start()", body);
     const res = await this._fetch("/record/start", {
       method: "POST",
       body
@@ -37,16 +38,26 @@ export default class Record {
   }
 
   async stop(body) {
-    console.warn("recorder.stop()");
-    const res = await this._fetch("/record/stop", {
+    console.warn("recorder.stop()", body);
+    await this._fetch("/record/stop", {
       method: "POST",
       body
     });
-    return res;
+    return null;
   }
 
   async _fetch(url, options) {
+    if ("body" in options) {
+      options.body = JSON.stringify(options.body);
+    }
+
     const res = await fetch(`${this._url}${url}`, options);
-    return res;
+    const json = await res.json();
+
+    if (json.error) {
+      throw new Error(`${json.error}: ${json.message}`);
+    }
+
+    return json;
   }
 }

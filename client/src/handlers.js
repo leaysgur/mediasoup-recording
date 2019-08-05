@@ -4,7 +4,9 @@ export const onLoad = async (
   { logger, client }
 ) => {
   logger.log("loaded");
+
   $micMute.disabled = $micUnmute.disabled = $recStart.disabled = $recStop.disabled = true;
+
   await client.setup();
 };
 
@@ -51,20 +53,32 @@ export const onClickMicUnmute = (
   $micUnmute.disabled = !state.muted;
 };
 
-export const onClickRecStart = (state, { $recStart, $recStop }, { logger }) => {
+export const onClickRecStart = async (
+  state,
+  { $recStart, $recStop },
+  { logger, client }
+) => {
   logger.log("start recording");
 
   state.recording = true;
 
   $recStart.disabled = state.recording;
   $recStop.disabled = !state.recording;
+
+  await client.start(state.track);
 };
 
-export const onClickRecStop = (state, { $recStart, $recStop }, { logger }) => {
+export const onClickRecStop = async (
+  state,
+  { $recStart, $recStop },
+  { logger, client }
+) => {
   logger.log("stop recording");
 
   state.recording = false;
 
   $recStart.disabled = state.recording;
   $recStop.disabled = !state.recording;
+
+  await client.stop();
 };
