@@ -168,7 +168,7 @@ module.exports = async (fastify, options, done) => {
     console.log("rtpTransport closed on", rtpTransport.tuple);
     rtpConsumer.close();
     console.log(`rtpConsumer closed with id ${rtpConsumer.id}`);
-    ps.kill();
+    ps.kill("SIGINT");
     console.log(`process killed with pid ${ps.pid}`);
 
     producerItems.delete(producerId);

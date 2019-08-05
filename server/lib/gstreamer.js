@@ -7,11 +7,7 @@ module.exports = (port, pt, dest) => {
   // debug: echo back
   // const opts = `rtpbin name=rtpbin udpsrc port=${port} caps="application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=${pt}" ! rtpbin.recv_rtp_sink_0 rtpbin. ! rtpopusdepay ! opusdec ! autoaudiosink`;
 
-  // debug: save wav
-  // const opts = `rtpbin name=rtpbin udpsrc port=${port} caps="application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=${pt}" ! rtpbin.recv_rtp_sink_0 rtpbin. ! rtpopusdepay ! opusdec ! wavenc ! filesink location=${dest}`;
-
-  // TODO: wanna save ogg but how...??
-  const opts = `rtpbin name=rtpbin udpsrc port=${port} caps="application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=${pt}" ! rtpbin.recv_rtp_sink_0 rtpbin. ! rtpopusdepay ! opusdec ! wavenc ! filesink location=${dest}`;
+  const opts = `rtpbin name=rtpbin udpsrc port=${port} caps="application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=${pt}" ! rtpbin.recv_rtp_sink_0 rtpbin. ! rtpopusdepay ! opusparse ! oggmux ! filesink location=${dest}`;
 
   return exec(`${cmd} ${opts}`);
 };
