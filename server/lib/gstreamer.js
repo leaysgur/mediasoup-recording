@@ -3,7 +3,7 @@ const { spawn } = require("child_process");
 module.exports = (port, dest) => {
   console.log(`rtp:${port} => ${dest}`);
 
-  const cmd = "gst-launch-1.0";
+  // const cmd = "gst-launch-1.0";
   // const opts = [
   //   "rtpbin",
   //   "name=rtpbin",
@@ -27,7 +27,10 @@ module.exports = (port, dest) => {
   //   "sync=false",
   //   "async=false"
   // ];
-  const opts = ["audiotestsrc", "!", "autoaudiosink"];
+  // const opts = ["audiotestsrc", "!", "autoaudiosink"];
+
+  const cmd = "ls";
+  const opts = ["-l"];
 
   const ps = spawn(cmd, opts);
   ps.stdout.on("data", data => {

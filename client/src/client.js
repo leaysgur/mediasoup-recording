@@ -41,6 +41,11 @@ export default class Client {
       .catch(console.error);
     console.warn(this._consumer);
 
+    // start recording
+    await this._recorder
+      .start({ producerId: this._producer.id })
+      .catch(console.error);
+
     return this._consumer;
   }
 
@@ -99,7 +104,7 @@ export default class Client {
       async ({ kind, rtpParameters }, callback, errback) => {
         console.warn("client.sendTransport.on(produce)");
         try {
-          const { id } = await this._recorder.start({
+          const { id } = await this._recorder.produce({
             transportId: this._sendTransport.id,
             kind,
             rtpParameters

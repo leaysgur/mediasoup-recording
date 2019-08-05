@@ -28,9 +28,9 @@ export default class Record {
     return null;
   }
 
-  async start(body) {
-    console.warn("recorder.start()", body);
-    const res = await this._fetch("/record/start", {
+  async produce(body) {
+    console.warn("recorder.produce()", body);
+    const res = await this._fetch("/record/produce", {
       method: "POST",
       body
     });
@@ -44,6 +44,15 @@ export default class Record {
       body
     });
     return res;
+  }
+
+  async start(body) {
+    console.warn("recorder.start()", body);
+    await this._fetch("/record/start", {
+      method: "POST",
+      body
+    });
+    return null;
   }
 
   async stop(body) {

@@ -39,7 +39,7 @@ module.exports = async (fastify, options, done) => {
     return {};
   });
 
-  fastify.post("/record/start", async req => {
+  fastify.post("/record/produce", async req => {
     const { transportId, kind, rtpParameters } = JSON.parse(req.body);
 
     const transport = transports.get(transportId);
@@ -55,35 +55,12 @@ module.exports = async (fastify, options, done) => {
 
     console.log(`producer created with id ${producer.id}`);
 
-    const rtpTransport = await router
-      .createPlainRtpTransport({
-        listenIp: serverIp
-      })
-      .catch(console.error);
-
-    console.log("rtpTransport created on", rtpTransport.tuple);
-
-    const ps = spawnGStreamer(
-      rtpTransport.tuple.localPort,
-      `./files/${producer.id}.ogg`
-    );
-    console.log("recording process spawned", ps.pid);
-
-    const rtpConsumer = await rtpTransport
-      .consume({
-        producerId: producer.id,
-        rtpCapabilities: router.rtpCapabilities
-      })
-      .catch(console.error);
-
-    console.log(`rtpConsumer created with id ${rtpConsumer.id}`);
-
     producerItems.set(producer.id, [
       producer,
       null, // for consumer
-      rtpTransport,
-      rtpConsumer,
-      ps
+      null, // for rtpTransport
+      null, // for rtpConsumer
+      null // for recording process
     ]);
 
     return { id: producer.id };
@@ -116,6 +93,43 @@ module.exports = async (fastify, options, done) => {
     };
   });
 
+  fastify.post("/record/start", async req => {
+    const { producerId } = JSON.parse(req.body);
+
+    const producerItem = producerItems.get(producerId);
+    if (!producerItem)
+      throw new Error(`producerItem with id "${producerId}" not found`);
+
+    const rtpTransport = await router
+      .createPlainRtpTransport({
+        listenIp: serverIp
+      })
+      .catch(console.error);
+
+    console.log("rtpTransport created on", rtpTransport.tuple);
+
+    const ps = spawnGStreamer(
+      rtpTransport.tuple.localPort,
+      `./files/${producerId}.ogg`
+    );
+    console.log("recording process spawned with pid", ps.pid);
+
+    const rtpConsumer = await rtpTransport
+      .consume({
+        producerId,
+        rtpCapabilities: router.rtpCapabilities
+      })
+      .catch(console.error);
+
+    console.log(`rtpConsumer created with id ${rtpConsumer.id}`);
+
+    producerItem.splice(2, 1, rtpTransport);
+    producerItem.splice(3, 1, rtpConsumer);
+    producerItem.splice(4, 1, ps);
+
+    return {};
+  });
+
   fastify.post("/record/stop", async req => {
     const { producerId } = JSON.parse(req.body);
 
@@ -133,7 +147,7 @@ module.exports = async (fastify, options, done) => {
     rtpConsumer.close();
     console.log(`rtpConsumer closed with id ${rtpConsumer.id}`);
     ps.kill();
-    console.log(`process killed with id ${ps.pid}`);
+    console.log(`process killed with pid ${ps.pid}`);
 
     producerItems.delete(producerId);
 
