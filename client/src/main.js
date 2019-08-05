@@ -18,6 +18,7 @@ import {
 
   const els = {
     $micCapture: document.getElementById("mic-capture"),
+    $micAudio: document.getElementById("mic-audio"),
     $micMute: document.getElementById("mic-mute"),
     $micUnmute: document.getElementById("mic-unmute"),
     $recStart: document.getElementById("rec-start"),

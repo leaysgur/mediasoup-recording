@@ -10,7 +10,7 @@ export const onLoad = async (
 
 export const onClickMicCapture = async (
   state,
-  { $micCapture, $micMute, $micUnmute, $recStart },
+  { $micCapture, $micAudio, $micMute, $micUnmute, $recStart },
   { logger }
 ) => {
   logger.log("capturing mic.");
@@ -25,6 +25,9 @@ export const onClickMicCapture = async (
 
   $micMute.disabled = state.muted;
   $micUnmute.disabled = !state.muted;
+
+  $micAudio.srcObject = new MediaStream([state.track]);
+  await $micAudio.play().catch(err => logger.error(err.toString()));
 
   logger.log("captured!");
 };
