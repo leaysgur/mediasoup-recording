@@ -1,6 +1,6 @@
 module.exports = async (fastify, options, done) => {
   const { serverIp } = fastify.$config;
-  const { router, transports, producers } = fastify.$state;
+  const { router, transports, producerItems } = fastify.$state;
 
   fastify.get("/record/capabilities", async () => {
     return router.rtpCapabilities;
@@ -59,7 +59,7 @@ module.exports = async (fastify, options, done) => {
       })
       .catch(console.error);
 
-    console.log(`rtpTransport created on ${rtpTransport.tuple}`);
+    console.log("rtpTransport created on", rtpTransport.tuple);
 
     const consumer = await rtpTransport
       .consume({
@@ -70,7 +70,7 @@ module.exports = async (fastify, options, done) => {
 
     console.log(`consumer created with id ${consumer.id}`);
 
-    producers.set(producer.id, [producer, rtpTransport, consumer]);
+    producerItems.set(producer.id, [producer, rtpTransport, consumer]);
 
     return { id: producer.id };
   });
@@ -78,13 +78,18 @@ module.exports = async (fastify, options, done) => {
   fastify.post("/record/stop", async req => {
     const { producerId } = JSON.parse(req.body);
 
-    const producer = producers.get(producerId);
-    if (!producer)
-      throw new Error(`producer with id "${producerId}" not found`);
+    const producerItem = producerItems.get(producerId);
+    if (!producerItem)
+      throw new Error(`producerItem with id "${producerId}" not found`);
 
-    producer.forEach(p => p.close());
-    producers.delete(producerId);
+    const [producer, rtpTransport, consumer] = producerItem;
+    producer.close();
     console.log(`producer closed with id ${producerId}`);
+    rtpTransport.close();
+    console.log("rtpTransport closed on", rtpTransport.tuple);
+    consumer.close();
+    console.log(`consumer closed with id ${consumer.id}`);
+    producerItems.delete(producerId);
 
     return {};
   });

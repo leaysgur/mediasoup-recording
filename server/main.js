@@ -32,7 +32,7 @@ const recordRoute = require("./lib/routes/record");
     ]
   });
 
-  const fastify = createFastify({ logger: true });
+  const fastify = createFastify();
 
   fastify.register(cors);
   fastify.register(formBody);
@@ -47,7 +47,7 @@ const recordRoute = require("./lib/routes/record");
     // Map<transportId, Transport>
     transports: new Map(),
     // Map<producerId, [Producer, PlainRtpTransport, Consumer]>
-    producers: new Map()
+    producerItems: new Map()
   });
 
   fastify.register(recordRoute);
