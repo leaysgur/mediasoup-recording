@@ -27,7 +27,6 @@ export const onClickMicCapture = async (
   $micUnmute.disabled = !state.muted;
 
   $micAudio.srcObject = new MediaStream([state.track]);
-  await $micAudio.play().catch(err => logger.error(err.toString()));
 
   logger.log("captured!");
 };
@@ -72,7 +71,6 @@ export const onClickRecStart = async (
   const consumer = await client.start(state.track.clone());
 
   $recAudio.srcObject = new MediaStream([consumer.track]);
-  await $recAudio.play().catch(err => logger.error(err.toString()));
 
   logger.log("now recording...");
 };
