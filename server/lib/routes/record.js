@@ -108,10 +108,9 @@ module.exports = async (fastify, options, done) => {
       })
       .catch(console.error);
 
-    const rtpPort = pickIpFromRange(recMinPort, recMaxPort);
-    const rtcpPort = pickIpFromRange(recMinPort, recMaxPort);
+    const remotePort = pickIpFromRange(recMinPort, recMaxPort);
     await rtpTransport
-      .connect({ ip: serverIp, port: rtpPort, rtcpPort })
+      .connect({ ip: serverIp, port: remotePort, rtcpPort: remotePort + 1 })
       .catch(console.error);
 
     console.log("rtpTransport created on", rtpTransport.tuple);
