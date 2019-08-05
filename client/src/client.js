@@ -22,6 +22,32 @@ export default class Client extends EventEmitter {
 
   async start(track) {
     console.warn("start()", track);
+
+    if (this._sendTransport === null) {
+      await this._connectTransport();
+    }
+
+    const audioProducer = await this._sendTransport
+      .produce({ track })
+      .catch(console.error);
+    console.warn(audioProducer);
+
+    this._producer = audioProducer;
+  }
+
+  async stop() {
+    console.warn("client.stop()");
+    this._producer.close();
+
+    await this._recorder
+      .stop({ producerId: this._producer.id })
+      .catch(console.error);
+    this._producer = null;
+
+    console.warn("stopped");
+  }
+
+  async _connectTransport() {
     const transportInfo = await this._recorder
       .createTransport()
       .catch(console.error);
@@ -62,22 +88,5 @@ export default class Client extends EventEmitter {
         }
       }
     );
-
-    const audioProducer = await this._sendTransport
-      .produce({ track })
-      .catch(console.error);
-    console.warn(audioProducer);
-
-    this._producer = audioProducer;
-  }
-
-  async stop() {
-    console.warn("client.stop()");
-    this._producer.close();
-
-    await this._recorder
-      .stop({ producerId: this._producer.id })
-      .catch(console.error);
-    console.warn("stopped");
   }
 }

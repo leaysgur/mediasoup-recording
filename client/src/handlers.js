@@ -15,7 +15,7 @@ export const onClickMicCapture = async (
   { $micCapture, $micMute, $micUnmute, $recStart },
   { logger }
 ) => {
-  logger.log("capture mic.");
+  logger.log("capturing mic.");
 
   const stream = await navigator.mediaDevices
     .getUserMedia({ audio: true })
@@ -27,6 +27,8 @@ export const onClickMicCapture = async (
 
   $micMute.disabled = state.muted;
   $micUnmute.disabled = !state.muted;
+
+  logger.log("captured!");
 };
 
 export const onClickMicMute = (state, { $micMute, $micUnmute }, { logger }) => {
@@ -65,7 +67,10 @@ export const onClickRecStart = async (
   $recStart.disabled = state.recording;
   $recStop.disabled = !state.recording;
 
-  await client.start(state.track);
+  // mediasoup-client stop() the track on producer.close()
+  await client.start(state.track.clone());
+
+  logger.log("now recording...");
 };
 
 export const onClickRecStop = async (
@@ -81,4 +86,6 @@ export const onClickRecStop = async (
   $recStop.disabled = !state.recording;
 
   await client.stop();
+
+  logger.log("stopped");
 };
