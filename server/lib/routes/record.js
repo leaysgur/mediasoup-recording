@@ -103,12 +103,14 @@ module.exports = async (fastify, options, done) => {
 
     const rtpTransport = await router
       .createPlainRtpTransport({
-        listenIp: serverIp
+        listenIp: serverIp,
+        rtcpMux: false
       })
       .catch(console.error);
-    const recPort = pickIpFromRange(recMinPort, recMaxPort);
+    const rtpPort = pickIpFromRange(recMinPort, recMaxPort);
+    const rtcpPort = pickIpFromRange(recMinPort, recMaxPort);
     await rtpTransport
-      .connect({ ip: serverIp, port: recPort })
+      .connect({ ip: serverIp, port: rtpPort, rtcpPort })
       .catch(console.error);
 
     console.log("rtpTransport created on", rtpTransport.tuple);
