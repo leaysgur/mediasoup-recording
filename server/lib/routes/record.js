@@ -69,18 +69,51 @@ module.exports = async (fastify, options, done) => {
     );
     console.log("recording process spawned", ps.pid);
 
-    const consumer = await rtpTransport
+    const rtpConsumer = await rtpTransport
       .consume({
         producerId: producer.id,
         rtpCapabilities: router.rtpCapabilities
       })
       .catch(console.error);
 
-    console.log(`consumer created with id ${consumer.id}`);
+    console.log(`rtpConsumer created with id ${rtpConsumer.id}`);
 
-    producerItems.set(producer.id, [producer, rtpTransport, consumer, ps]);
+    producerItems.set(producer.id, [
+      producer,
+      null, // for consumer
+      rtpTransport,
+      rtpConsumer,
+      ps
+    ]);
 
     return { id: producer.id };
+  });
+
+  fastify.post("/record/consume", async req => {
+    const { producerId, transportId } = JSON.parse(req.body);
+
+    const transport = transports.get(transportId);
+    if (!transport)
+      throw new Error(`transport with id "${transportId}" not found`);
+
+    const consumer = await transport.consume({
+      producerId,
+      rtpCapabilities: router.rtpCapabilities
+    });
+    console.log(`consumer created with id ${consumer.id}`);
+
+    const producerItem = producerItems.get(producerId);
+    if (!producerItem)
+      throw new Error(`producerItem with id "${producerId}" not found`);
+
+    producerItem.splice(1, 1, consumer);
+
+    return {
+      id: consumer.id,
+      producerId,
+      kind: consumer.kind,
+      rtpParameters: consumer.rtpParameters
+    };
   });
 
   fastify.post("/record/stop", async req => {
@@ -90,13 +123,15 @@ module.exports = async (fastify, options, done) => {
     if (!producerItem)
       throw new Error(`producerItem with id "${producerId}" not found`);
 
-    const [producer, rtpTransport, consumer, ps] = producerItem;
+    const [producer, consumer, rtpTransport, rtpConsumer, ps] = producerItem;
     producer.close();
     console.log(`producer closed with id ${producerId}`);
-    rtpTransport.close();
-    console.log("rtpTransport closed on", rtpTransport.tuple);
     consumer.close();
     console.log(`consumer closed with id ${consumer.id}`);
+    rtpTransport.close();
+    console.log("rtpTransport closed on", rtpTransport.tuple);
+    rtpConsumer.close();
+    console.log(`rtpConsumer closed with id ${rtpConsumer.id}`);
     ps.kill();
     console.log(`process killed with id ${ps.pid}`);
 

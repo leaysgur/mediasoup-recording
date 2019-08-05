@@ -46,7 +46,7 @@ const recordRoute = require("./lib/routes/record");
     router,
     // Map<transportId, Transport>
     transports: new Map(),
-    // Map<producerId, [Producer, PlainRtpTransport, Consumer]>
+    // Map<producerId, [Producer, Consumer, PlainRtpTransport, PlainRtpConsumer, recordProcess]>
     producerItems: new Map()
   });
 
