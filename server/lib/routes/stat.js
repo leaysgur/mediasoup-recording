@@ -1,10 +1,10 @@
 module.exports = async (fastify, options, done) => {
-  const { transports, producers } = fastify.$state;
+  const { transports, producerItems } = fastify.$state;
 
   fastify.get("/stat", async () => {
     return {
       transports: transports.size,
-      producers: producers.size
+      producerItems: producerItems.size
     };
   });
 
