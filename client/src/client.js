@@ -18,7 +18,7 @@ export default class Client extends EventEmitter {
       await this._setup();
     }
     if (this._sendTransport === null) {
-      await this._connectTransport();
+      await this._connectSendTransport();
     }
 
     const audioProducer = await this._sendTransport
@@ -52,7 +52,7 @@ export default class Client extends EventEmitter {
     console.warn(routerRtpCapabilities);
   }
 
-  async _connectTransport() {
+  async _connectSendTransport() {
     const transportInfo = await this._recorder
       .createTransport()
       .catch(console.error);
