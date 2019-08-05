@@ -1,4 +1,5 @@
 module.exports = async (fastify, options, done) => {
+  const { serverIp } = fastify.$config;
   const { router, transports, producers } = fastify.$state;
 
   fastify.get("/record/capabilities", async () => {
@@ -8,8 +9,7 @@ module.exports = async (fastify, options, done) => {
   fastify.post("/record/transport/create", async () => {
     const transport = await router
       .createWebRtcTransport({
-        // TODO: from state or config
-        listenIps: [{ ip: "127.0.0.1" }]
+        listenIps: [{ ip: serverIp }]
       })
       .catch(console.error);
 

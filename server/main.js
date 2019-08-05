@@ -5,6 +5,9 @@ const cors = require("fastify-cors");
 const recordRoute = require("./lib/record");
 
 (async () => {
+  const serverIp = "127.0.0.1";
+  const serverPort = 2345;
+
   const worker = await mediasoup.createWorker({
     rtcMinPort: 3000,
     rtcMaxPort: 4000
@@ -28,10 +31,15 @@ const recordRoute = require("./lib/record");
     ]
   });
 
-  const fastify = createFastify();
+  const fastify = createFastify({ logger: true });
 
   fastify.register(cors);
   fastify.register(formBody);
+
+  fastify.decorate("$config", {
+    serverIp,
+    serverPort
+  });
   fastify.decorate("$state", {
     router,
     // Map<transportId, Transport>
@@ -42,7 +50,7 @@ const recordRoute = require("./lib/record");
 
   fastify.register(recordRoute);
 
-  fastify.listen(2345, "127.0.0.1", (err, address) => {
+  fastify.listen(serverPort, serverIp, (err, address) => {
     if (err) {
       console.log("server creation failed, exit..");
       process.exit(1);
