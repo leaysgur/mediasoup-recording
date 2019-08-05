@@ -107,6 +107,7 @@ module.exports = async (fastify, options, done) => {
         rtcpMux: false
       })
       .catch(console.error);
+
     const rtpPort = pickIpFromRange(recMinPort, recMaxPort);
     const rtcpPort = pickIpFromRange(recMinPort, recMaxPort);
     await rtpTransport
@@ -115,8 +116,22 @@ module.exports = async (fastify, options, done) => {
 
     console.log("rtpTransport created on", rtpTransport.tuple);
 
+    const rtpConsumer = await rtpTransport
+      .consume({
+        producerId,
+        rtpCapabilities: router.rtpCapabilities
+      })
+      .catch(console.error);
+
+    console.log(`rtpConsumer created with id ${rtpConsumer.id}`);
+
+    const {
+      codecs: [{ preferredPayloadType }]
+    } = router.rtpCapabilities;
+
     const ps = spawnGStreamer(
       rtpTransport.tuple.remotePort,
+      preferredPayloadType,
       `${recordDir}/${producerId}.ogg`
     );
     console.log("recording process spawned with pid", ps.pid);
@@ -130,15 +145,6 @@ module.exports = async (fastify, options, done) => {
     ps.on("close", code => {
       console.log(`child process exited with code ${code}`);
     });
-
-    const rtpConsumer = await rtpTransport
-      .consume({
-        producerId,
-        rtpCapabilities: router.rtpCapabilities
-      })
-      .catch(console.error);
-
-    console.log(`rtpConsumer created with id ${rtpConsumer.id}`);
 
     producerItem.splice(2, 1, rtpTransport);
     producerItem.splice(3, 1, rtpConsumer);
