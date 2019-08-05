@@ -102,15 +102,12 @@ module.exports = async (fastify, options, done) => {
       throw new Error(`producerItem with id "${producerId}" not found`);
 
     const rtpTransport = await router
-      .createPlainRtpTransport({
-        listenIp: serverIp,
-        rtcpMux: false
-      })
+      .createPlainRtpTransport({ listenIp: serverIp })
       .catch(console.error);
 
     const remotePort = pickIpFromRange(recMinPort, recMaxPort);
     await rtpTransport
-      .connect({ ip: serverIp, port: remotePort, rtcpPort: remotePort + 1 })
+      .connect({ ip: serverIp, port: remotePort })
       .catch(console.error);
 
     console.log("rtpTransport created on", rtpTransport.tuple);
@@ -135,14 +132,8 @@ module.exports = async (fastify, options, done) => {
     );
     console.log("recording process spawned with pid", ps.pid);
 
-    ps.stdout.on("data", data => {
-      console.log(`stdout: ${data}`);
-    });
-    ps.stderr.on("data", data => {
-      console.log(`stderr: ${data}`);
-    });
-    ps.on("close", code => {
-      console.log(`child process exited with code ${code}`);
+    ps.on("exit", (code, signal) => {
+      console.log(`process exited with code: ${code}, signal: ${signal}`);
     });
 
     producerItem.splice(2, 1, rtpTransport);
