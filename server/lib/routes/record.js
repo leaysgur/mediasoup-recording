@@ -14,6 +14,7 @@ module.exports = async (fastify, options, done) => {
       .catch(console.error);
 
     transports.set(transport.id, transport);
+    console.log(`transport created with id ${transport.id}`);
 
     return {
       id: transport.id,
@@ -31,6 +32,7 @@ module.exports = async (fastify, options, done) => {
       throw new Error(`transport with id "${transportId}" not found`);
 
     await transport.connect({ dtlsParameters }).catch(console.error);
+    console.log(`transport with id ${transport.id} connected`);
 
     return {};
   });
@@ -49,7 +51,26 @@ module.exports = async (fastify, options, done) => {
       })
       .catch(console.error);
 
-    producers.set(producer.id, producer);
+    console.log(`producer created with id ${producer.id}`);
+
+    const rtpTransport = await router
+      .createPlainRtpTransport({
+        listenIp: serverIp
+      })
+      .catch(console.error);
+
+    console.log(`rtpTransport created on ${rtpTransport.tuple}`);
+
+    const consumer = await rtpTransport
+      .consume({
+        producerId: producer.id,
+        rtpCapabilities: router.rtpCapabilities
+      })
+      .catch(console.error);
+
+    console.log(`consumer created with id ${consumer.id}`);
+
+    producers.set(producer.id, [producer, rtpTransport, consumer]);
 
     return { id: producer.id };
   });
@@ -61,8 +82,9 @@ module.exports = async (fastify, options, done) => {
     if (!producer)
       throw new Error(`producer with id "${producerId}" not found`);
 
-    producer.close();
+    producer.forEach(p => p.close());
     producers.delete(producerId);
+    console.log(`producer closed with id ${producerId}`);
 
     return {};
   });
