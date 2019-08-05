@@ -2,7 +2,8 @@ const createFastify = require("fastify");
 const mediasoup = require("mediasoup");
 const formBody = require("fastify-formbody");
 const cors = require("fastify-cors");
-const recordRoute = require("./lib/record");
+const statRoute = require("./lib/routes/stat");
+const recordRoute = require("./lib/routes/record");
 
 (async () => {
   const serverIp = "127.0.0.1";
@@ -40,6 +41,7 @@ const recordRoute = require("./lib/record");
     serverIp,
     serverPort
   });
+  // TODO: detect missing transport and producer(eg. client disappear)
   fastify.decorate("$state", {
     router,
     // Map<transportId, Transport>
@@ -49,6 +51,7 @@ const recordRoute = require("./lib/record");
   });
 
   fastify.register(recordRoute);
+  fastify.register(statRoute);
 
   fastify.listen(serverPort, serverIp, (err, address) => {
     if (err) {

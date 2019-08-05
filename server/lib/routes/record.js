@@ -62,6 +62,7 @@ module.exports = async (fastify, options, done) => {
       throw new Error(`producer with id "${producerId}" not found`);
 
     producer.close();
+    producers.delete(producerId);
 
     return {};
   });
