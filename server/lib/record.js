@@ -24,7 +24,7 @@ module.exports = async (fastify, options, done) => {
   });
 
   fastify.post("/record/transport/connect", async req => {
-    const { transportId, dtlsParameters } = req.body;
+    const { transportId, dtlsParameters } = JSON.parse(req.body);
 
     const transport = transports.get(transportId);
     if (!transport)
@@ -36,7 +36,7 @@ module.exports = async (fastify, options, done) => {
   });
 
   fastify.post("/record/start", async req => {
-    const { transportId, kind, rtpParameters } = req.body;
+    const { transportId, kind, rtpParameters } = JSON.parse(req.body);
 
     const transport = transports.get(transportId);
     if (!transport)
@@ -54,8 +54,8 @@ module.exports = async (fastify, options, done) => {
     return { id: producer.id };
   });
 
-  fastify.post("/record/end", async req => {
-    const { producerId } = req.body;
+  fastify.post("/record/stop", async req => {
+    const { producerId } = JSON.parse(req.body);
 
     const producer = producers.get(producerId);
     if (!producer)
