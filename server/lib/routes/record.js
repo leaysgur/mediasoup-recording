@@ -1,7 +1,8 @@
 const spawnGStreamer = require("../gstreamer");
+const { pickIpFromRange } = require("../utils");
 
 module.exports = async (fastify, options, done) => {
-  const { serverIp } = fastify.$config;
+  const { serverIp, recMinPort, recMaxPort } = fastify.$config;
   const { router, transports, producerItems } = fastify.$state;
 
   fastify.get("/record/capabilities", async () => {
@@ -105,11 +106,15 @@ module.exports = async (fastify, options, done) => {
         listenIp: serverIp
       })
       .catch(console.error);
+    const recPort = pickIpFromRange(recMinPort, recMaxPort);
+    await rtpTransport
+      .connect({ ip: serverIp, port: recPort })
+      .catch(console.error);
 
     console.log("rtpTransport created on", rtpTransport.tuple);
 
     const ps = spawnGStreamer(
-      rtpTransport.tuple.localPort,
+      rtpTransport.tuple.remotePort,
       `./files/${producerId}.ogg`
     );
     console.log("recording process spawned with pid", ps.pid);
