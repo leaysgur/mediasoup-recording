@@ -67,7 +67,7 @@ module.exports = async (fastify, options, done) => {
   });
 
   fastify.post("/record/consume", async req => {
-    const { producerId, transportId } = JSON.parse(req.body);
+    const { producerId, transportId, rtpCapabilities } = JSON.parse(req.body);
 
     const transport = transports.get(transportId);
     if (!transport)
@@ -75,7 +75,7 @@ module.exports = async (fastify, options, done) => {
 
     const consumer = await transport.consume({
       producerId,
-      rtpCapabilities: router.rtpCapabilities
+      rtpCapabilities: rtpCapabilities
     });
     console.log(`consumer created with id ${consumer.id}`);
 

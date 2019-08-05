@@ -33,7 +33,8 @@ export default class Client {
     const info = await this._recorder
       .consume({
         producerId: this._producer.id,
-        transportId: this._recvTransport.id
+        transportId: this._recvTransport.id,
+        rtpCapabilities: this._device.rtpCapabilities
       })
       .catch(console.error);
     this._consumer = await this._recvTransport
