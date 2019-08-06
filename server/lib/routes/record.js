@@ -56,13 +56,13 @@ module.exports = async (fastify, options, done) => {
 
     console.log(`producer created with id ${producer.id}`);
 
-    producerItems.set(producer.id, [
+    producerItems.set(producer.id, {
       producer,
-      null, // for consumer
-      null, // for rtpTransport
-      null, // for rtpConsumer
-      null // for recording process
-    ]);
+      consumer: null, // for consumer
+      rtpTransport: null, // for rtpTransport
+      rtpConsumer: null, // for rtpConsumer
+      recordProcess: null // for record process
+    });
 
     return { id: producer.id };
   });
@@ -84,7 +84,7 @@ module.exports = async (fastify, options, done) => {
     if (!producerItem)
       throw new Error(`producerItem with id "${producerId}" not found`);
 
-    producerItem.splice(1, 1, consumer);
+    producerItem.consumer = consumer;
 
     return {
       id: consumer.id,
@@ -136,9 +136,9 @@ module.exports = async (fastify, options, done) => {
       console.log(`process exited with code: ${code}, signal: ${signal}`);
     });
 
-    producerItem.splice(2, 1, rtpTransport);
-    producerItem.splice(3, 1, rtpConsumer);
-    producerItem.splice(4, 1, ps);
+    producerItem.rtpTransport = rtpTransport;
+    producerItem.rtpConsumer = rtpConsumer;
+    producerItem.recordProcess = ps;
 
     return {};
   });
@@ -150,7 +150,13 @@ module.exports = async (fastify, options, done) => {
     if (!producerItem)
       throw new Error(`producerItem with id "${producerId}" not found`);
 
-    const [producer, consumer, rtpTransport, rtpConsumer, ps] = producerItem;
+    const {
+      producer,
+      consumer,
+      rtpTransport,
+      rtpConsumer,
+      recordProcess
+    } = producerItem;
     producer.close();
     console.log(`producer closed with id ${producerId}`);
     consumer.close();
@@ -159,8 +165,9 @@ module.exports = async (fastify, options, done) => {
     console.log("rtpTransport closed on", rtpTransport.tuple);
     rtpConsumer.close();
     console.log(`rtpConsumer closed with id ${rtpConsumer.id}`);
-    ps.kill("SIGINT");
-    console.log(`process killed with pid ${ps.pid}`);
+    // gst-launch needs SIGINT
+    recordProcess.kill("SIGINT");
+    console.log(`process killed with pid ${recordProcess.pid}`);
 
     producerItems.delete(producerId);
 

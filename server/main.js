@@ -2,37 +2,23 @@ const createFastify = require("fastify");
 const mediasoup = require("mediasoup");
 const formBody = require("fastify-formbody");
 const cors = require("fastify-cors");
+const config = require("./config");
 const statRoute = require("./lib/routes/stat");
 const recordRoute = require("./lib/routes/record");
 
 (async () => {
-  const serverIp = "127.0.0.1";
-  const serverPort = 2345;
-  const recMinPort = 4001;
-  const recMaxPort = 5000;
-  const recordDir = "./record";
-
+  // TODO: use multiple worker and balance
   const worker = await mediasoup.createWorker({
-    rtcMinPort: 3001,
-    rtcMaxPort: 4000
+    rtcMinPort: config.rtcMinPort,
+    rtcMaxPort: config.rtcMaxPort
   });
-
   worker.once("died", () => {
     console.log("mediasoup Worker died, exit..");
     process.exit(1);
   });
 
-  // audio only
   const router = await worker.createRouter({
-    mediaCodecs: [
-      {
-        kind: "audio",
-        name: "opus",
-        mimeType: "audio/opus",
-        clockRate: 48000,
-        channels: 2
-      }
-    ]
+    mediaCodecs: config.mediaCodecs
   });
 
   const fastify = createFastify();
@@ -40,26 +26,20 @@ const recordRoute = require("./lib/routes/record");
   fastify.register(cors);
   fastify.register(formBody);
 
-  fastify.decorate("$config", {
-    serverIp,
-    serverPort,
-    recMinPort,
-    recMaxPort,
-    recordDir
-  });
-  // TODO: detect missing transport and producer(eg. client disappear)
+  fastify.decorate("$config", config);
+  // TODO: detect client disappear and delete transport and producerItem
   fastify.decorate("$state", {
     router,
     // Map<transportId, Transport>
     transports: new Map(),
-    // Map<producerId, [Producer, Consumer, PlainRtpTransport, PlainRtpConsumer, recordProcess]>
+    // Map<producerId, { Producer, Consumer, PlainRtpTransport, PlainRtpConsumer, recordProcess }>
     producerItems: new Map()
   });
 
   fastify.register(recordRoute);
   fastify.register(statRoute);
 
-  fastify.listen(serverPort, serverIp, (err, address) => {
+  fastify.listen(config.serverPort, config.serverIp, (err, address) => {
     if (err) {
       console.log("server creation failed, exit..");
       process.exit(1);
