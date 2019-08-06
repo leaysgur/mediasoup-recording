@@ -16,6 +16,13 @@ module.exports = async (fastify, options, done) => {
       })
       .catch(console.error);
 
+    // client close browser
+    transport.on("dtlsstatechange", state => {
+      if (state !== "closed") return;
+      transport.close();
+      transports.delete(transport.id, transport);
+    });
+
     transports.set(transport.id, transport);
     console.log(`transport created with id ${transport.id}`);
 
@@ -54,9 +61,39 @@ module.exports = async (fastify, options, done) => {
       })
       .catch(console.error);
 
+    const producerId = producer.id;
+
+    // client close browser => transportclose => close producerItem
+    producer.once("transportclose", () => {
+      // XXX: same as /record/stop handler...
+      const producerItem = producerItems.get(producerId);
+      if (!producerItem) return;
+
+      const {
+        producer,
+        consumer,
+        rtpTransport,
+        rtpConsumer,
+        recordProcess
+      } = producerItem;
+      producer.close();
+      console.log(`producer closed with id ${producerId}`);
+      consumer.close();
+      console.log(`consumer closed with id ${consumer.id}`);
+      rtpTransport.close();
+      console.log("rtpTransport closed on", rtpTransport.tuple);
+      rtpConsumer.close();
+      console.log(`rtpConsumer closed with id ${rtpConsumer.id}`);
+      // gst-launch needs SIGINT
+      recordProcess.kill("SIGINT");
+      console.log(`process killed with pid ${recordProcess.pid}`);
+
+      producerItems.delete(producerId);
+    });
+
     console.log(`producer created with id ${producer.id}`);
 
-    producerItems.set(producer.id, {
+    producerItems.set(producerId, {
       producer,
       consumer: null,
       rtpTransport: null,
@@ -64,7 +101,7 @@ module.exports = async (fastify, options, done) => {
       recordProcess: null
     });
 
-    return { id: producer.id };
+    return { id: producerId };
   });
 
   fastify.post("/record/consume", async req => {

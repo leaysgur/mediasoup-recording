@@ -27,7 +27,6 @@ const recordRoute = require("./lib/routes/record");
   fastify.register(formBody);
 
   fastify.decorate("$config", config);
-  // TODO: detect client disappear and delete transport and producerItem
   fastify.decorate("$state", {
     router,
     // Map<transportId, Transport>
