@@ -58,10 +58,10 @@ module.exports = async (fastify, options, done) => {
 
     producerItems.set(producer.id, {
       producer,
-      consumer: null, // for consumer
-      rtpTransport: null, // for rtpTransport
-      rtpConsumer: null, // for rtpConsumer
-      recordProcess: null // for record process
+      consumer: null,
+      rtpTransport: null,
+      rtpConsumer: null,
+      recordProcess: null
     });
 
     return { id: producer.id };
@@ -121,13 +121,9 @@ module.exports = async (fastify, options, done) => {
 
     console.log(`rtpConsumer created with id ${rtpConsumer.id}`);
 
-    const {
-      codecs: [{ preferredPayloadType }]
-    } = router.rtpCapabilities;
-
     const ps = spawnGStreamer(
       rtpTransport.tuple.remotePort,
-      preferredPayloadType,
+      router.rtpCapabilities.codecs[0],
       `${recordDir}/${producerId}.ogg`
     );
     console.log("recording process spawned with pid", ps.pid);
