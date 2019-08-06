@@ -6,7 +6,8 @@ import {
   onClickMicMute,
   onClickMicUnmute,
   onClickRecStart,
-  onClickRecStop
+  onClickRecStop,
+  onClickStatFetch
 } from "./handlers";
 
 (async () => {
@@ -24,6 +25,7 @@ import {
     $recStart: document.getElementById("rec-start"),
     $recStop: document.getElementById("rec-stop"),
     $recAudio: document.getElementById("rec-audio"),
+    $statFetch: document.getElementById("stat-fetch"),
     $evLogs: document.getElementById("ev-logs")
   };
 
@@ -51,6 +53,7 @@ import {
   els.$micUnmute.onclick = () => onClickMicUnmute(state, els, context);
   els.$recStart.onclick = () => onClickRecStart(state, els, context);
   els.$recStop.onclick = () => onClickRecStop(state, els, context);
+  els.$statFetch.onclick = () => onClickStatFetch(state, els, context);
 
   console.warn(state, context);
   onLoad(state, els, context);

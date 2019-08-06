@@ -101,3 +101,10 @@ export const onClickRecStop = async (
 
   logger.log("stopped");
 };
+
+export const onClickStatFetch = async (_, __, { logger, client }) => {
+  const res = await client
+    .fetchStat()
+    .catch(err => logger.error(err.toString()));
+  logger.log(JSON.stringify(res, null, 2));
+};

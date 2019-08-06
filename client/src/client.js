@@ -63,6 +63,13 @@ export default class Client {
     this._consumer = null;
   }
 
+  async fetchStat() {
+    const producerId = this._producer === null ? null : this._producer.id;
+
+    const stat = await this._recorder.stat({ producerId }).catch(console.error);
+    return stat;
+  }
+
   async _setup() {
     this._device = new Device();
 

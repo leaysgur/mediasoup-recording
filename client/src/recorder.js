@@ -64,6 +64,15 @@ export default class Record {
     return null;
   }
 
+  async stat(body) {
+    console.warn("recorder.stat()", body);
+    const res = await this._fetch("/stat", {
+      method: "POST",
+      body
+    });
+    return res;
+  }
+
   async _fetch(url, options) {
     if ("body" in options) {
       options.body = JSON.stringify(options.body);
