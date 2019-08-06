@@ -1,3 +1,4 @@
+const fs = require("fs");
 const createFastify = require("fastify");
 const mediasoup = require("mediasoup");
 const formBody = require("fastify-formbody");
@@ -7,6 +8,9 @@ const statRoute = require("./lib/routes/stat");
 const recordRoute = require("./lib/routes/record");
 
 (async () => {
+  // ensure directory exists
+  fs.accessSync(config.recordDir);
+
   // TODO: use multiple worker and balance
   const worker = await mediasoup.createWorker({
     rtcMinPort: config.rtcMinPort,

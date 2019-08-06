@@ -28,6 +28,8 @@ After that, setup repos.
 cd server
 npm i
 
+# create directry for recorded files and specify it in config.js
+
 # run rest+media server on http://127.0.0.1:2345
 npm run dev
 
