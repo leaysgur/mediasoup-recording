@@ -57,7 +57,7 @@ export const onClickMicUnmute = (
 
 export const onClickRecStart = async (
   state,
-  { $recStart, $recStop, $recAudio },
+  { $micAudio, $recStart, $recStop, $recAudio },
   { logger, client }
 ) => {
   logger.log("start recording");
@@ -67,9 +67,16 @@ export const onClickRecStart = async (
   $recStart.disabled = state.recording;
   $recStop.disabled = !state.recording;
 
-  // mediasoup-client stop() the track on producer.close()
-  const consumer = await client.start(state.track.clone());
+  // update local track again (mediasoup-client stop() the track...)
+  const stream = await navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .catch(err => logger.error(err.toString()));
+  state.track = stream.getTracks()[0];
+  $micAudio.srcObject = new MediaStream([state.track]);
 
+  logger.log("update track again");
+
+  const consumer = await client.start(state.track);
   $recAudio.srcObject = new MediaStream([consumer.track]);
 
   logger.log("now recording...");

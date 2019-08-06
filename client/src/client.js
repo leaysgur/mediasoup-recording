@@ -61,8 +61,6 @@ export default class Client {
 
     this._producer = null;
     this._consumer = null;
-
-    console.warn("stopped");
   }
 
   async _setup() {
