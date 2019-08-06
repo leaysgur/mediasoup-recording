@@ -1,5 +1,5 @@
 const spawnGStreamer = require("../gstreamer");
-const { pickIpFromRange } = require("../utils");
+const { pickNumberFromRange } = require("../utils");
 
 module.exports = async (fastify, options, done) => {
   const { serverIp, recMinPort, recMaxPort, recordDir } = fastify.$config;
@@ -142,7 +142,7 @@ module.exports = async (fastify, options, done) => {
       .createPlainRtpTransport({ listenIp: serverIp })
       .catch(console.error);
 
-    const remotePort = pickIpFromRange(recMinPort, recMaxPort);
+    const remotePort = pickNumberFromRange(recMinPort, recMaxPort);
     await rtpTransport
       .connect({ ip: serverIp, port: remotePort })
       .catch(console.error);
