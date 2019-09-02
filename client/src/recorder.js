@@ -37,15 +37,6 @@ export default class Record {
     return res;
   }
 
-  async consume(body) {
-    console.warn("recorder.consume()", body);
-    const res = await this._fetch("/record/consume", {
-      method: "POST",
-      body
-    });
-    return res;
-  }
-
   async start(body) {
     console.warn("recorder.start()", body);
     await this._fetch("/record/start", {
@@ -53,24 +44,6 @@ export default class Record {
       body
     });
     return null;
-  }
-
-  async stop(body) {
-    console.warn("recorder.stop()", body);
-    await this._fetch("/record/stop", {
-      method: "POST",
-      body
-    });
-    return null;
-  }
-
-  async stat(body) {
-    console.warn("recorder.stat()", body);
-    const res = await this._fetch("/stat", {
-      method: "POST",
-      body
-    });
-    return res;
   }
 
   async _fetch(url, options) {

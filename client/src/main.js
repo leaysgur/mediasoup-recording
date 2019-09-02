@@ -1,60 +1,29 @@
 import Recorder from "./recorder";
 import Client from "./client";
-import {
-  onLoad,
-  onClickMicCapture,
-  onClickMicMute,
-  onClickMicUnmute,
-  onClickRecStart,
-  onClickRecStop,
-  onClickStatFetch
-} from "./handlers";
+import { onLoad, onClickMicCapture, onClickRecStart } from "./handlers";
 
 (async () => {
-  const state = {
-    track: null, // MediaStreamTrack to record
-    muted: false, // track is enabled or NOT
-    recording: false // recording or NOT
-  };
-
-  const els = {
-    $micCapture: document.getElementById("mic-capture"),
-    $micAudio: document.getElementById("mic-audio"),
-    $micMute: document.getElementById("mic-mute"),
-    $micUnmute: document.getElementById("mic-unmute"),
-    $recStart: document.getElementById("rec-start"),
-    $recStop: document.getElementById("rec-stop"),
-    $recAudio: document.getElementById("rec-audio"),
-    $statFetch: document.getElementById("stat-fetch"),
-    $evLogs: document.getElementById("ev-logs")
-  };
-
-  const logger = {
-    log(data) {
-      console.log(data);
-      const time = new Date().toLocaleTimeString();
-      els.$evLogs.textContent += `${time}: ${data}\n`;
-    },
-    error(err) {
-      console.error(err);
-    }
-  };
   const recorder = new Recorder("http://localhost:2345");
   const client = new Client(recorder);
 
-  const context = {
-    logger,
+  const state = {
+    track: null, // MediaStreamTrack to record
     client
   };
 
-  // attach handlers
-  els.$micCapture.onclick = () => onClickMicCapture(state, els, context);
-  els.$micMute.onclick = () => onClickMicMute(state, els, context);
-  els.$micUnmute.onclick = () => onClickMicUnmute(state, els, context);
-  els.$recStart.onclick = () => onClickRecStart(state, els, context);
-  els.$recStop.onclick = () => onClickRecStop(state, els, context);
-  els.$statFetch.onclick = () => onClickStatFetch(state, els, context);
+  const els = {
+    $micCapture: document.querySelector("[data-mic-capture]"),
+    $micAudio: document.querySelector("[data-mic-audio]"),
+    $recStart: document.querySelectorAll("[data-rec-start]")
+  };
 
-  console.warn(state, context);
-  onLoad(state, els, context);
+  // attach handlers
+  els.$micCapture.onclick = () => onClickMicCapture(state, els);
+  els.$recStart.forEach($el => {
+    const tNum = $el.dataset.tnum | 0;
+    const pNum = $el.dataset.pnum | 0;
+    $el.onclick = () => onClickRecStart(state, els, { tNum, pNum });
+  });
+
+  onLoad(state, els);
 })();

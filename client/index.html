@@ -16,49 +16,18 @@
   </section>
 
   <section class="section">
-    <div class="tile is-ancestor">
+    <div class="container">
+      <h2 class="title">Capture mic.</h2>
+      <button class="button is-link" data-mic-capture>capture</button>
+      <audio controls data-mic-audio></audio>
+    </div>
+  </section>
 
-      <div class="tile is-4 is-vertical is-parent">
-
-        <div class="tile is-child box">
-          <h2 class="title">Setup mic.</h2>
-          <div class="content">
-            <button class="button is-link" id="mic-capture">capture</button>
-          </div>
-          <div class="content">
-            <audio controls id="mic-audio"></audio>
-          </div>
-          <div class="content">
-            <button class="button" id="mic-mute">mute</button>
-            <button class="button" id="mic-unmute">unmute</button>
-          </div>
-        </div>
-
-        <div class="tile is-child box">
-          <h2 class="title">Record</h2>
-          <div class="content">
-            <button class="button is-danger" id="rec-start">start</button>
-            <button class="button is-danger is-outlined" id="rec-stop">stop</button>
-          </div>
-          <div class="content">
-            <audio controls id="rec-audio"></audio>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="tile is-parent">
-        <div class="tile is-child box">
-          <h2 class="title">Logs</h2>
-          <div class="content">
-            <button class="button" id="stat-fetch">stat</button>
-          </div>
-          <div class="content">
-            <pre id="ev-logs"></pre>
-          </div>
-        </div>
-      </div>
-
+  <section class="section">
+    <div class="container">
+      <h2 class="title">Add transports(= clients) and producers(= tracks)</h2>
+      <button class="button is-danger" data-rec-start data-tnum="1" data-pnum="2">2 producers / 1 transport x 1</button>
+      <button class="button is-danger" data-rec-start data-tnum="5" data-pnum="1">1 producers / 1 transport x 5</button>
     </div>
   </section>
 
