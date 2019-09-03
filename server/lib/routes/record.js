@@ -19,6 +19,7 @@ module.exports = async (fastify, options, done) => {
       $config.mediasoup.serverIp
     );
     console.log(`transport created with id ${transport.id}`);
+    console.log(`router with id ${router.id} is used`);
 
     return {
       id: transport.id,
