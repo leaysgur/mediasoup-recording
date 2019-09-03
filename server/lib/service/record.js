@@ -4,7 +4,7 @@ class RecordService {
   constructor() {
     // Map<transportId, Transport>
     this._transports = new Map();
-    // Map<producerId, { Producer, PlainRtpTransport, PlainRtpConsumer, recordProcess }>
+    // Map<producerId, { PlainRtpTransport, PlainRtpConsumer, recordProcess }>
     this._producerItems = new Map();
   }
 
@@ -18,6 +18,7 @@ class RecordService {
     // client close browser
     transport.on("dtlsstatechange", state => {
       if (state !== "closed") return;
+
       transport.close();
       this._transports.delete(transport.id);
     });
@@ -40,19 +41,21 @@ class RecordService {
 
     const producer = await transport.produce(params);
 
+    this._producerItems.set(producer.id, {
+      rtpTransport: null,
+      rtpConsumer: null,
+      recordProcess: null
+    });
+
     // client close browser => transportclose => close producerItem
     producer.once("transportclose", () => {
       const producerItem = this._producerItems.get(producer.id);
       if (!producerItem) return;
 
-      const {
-        producer,
-        rtpTransport,
-        rtpConsumer,
-        recordProcess
-      } = producerItem;
       producer.close();
       console.log(`producer closed with id ${producer.id}`);
+
+      const { rtpTransport, rtpConsumer, recordProcess } = producerItem;
       rtpTransport.close();
       console.log("rtpTransport closed on", rtpTransport.tuple);
       rtpConsumer.close();
@@ -62,13 +65,6 @@ class RecordService {
       console.log(`process killed with pid ${recordProcess.pid}`);
 
       this._producerItems.delete(producer.id);
-    });
-
-    this._producerItems.set(producer.id, {
-      producer,
-      rtpTransport: null,
-      rtpConsumer: null,
-      recordProcess: null
     });
 
     return producer;

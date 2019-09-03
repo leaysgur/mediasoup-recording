@@ -1,24 +1,31 @@
+const dgram = require("dgram");
+
 class PortService {
   constructor({ min, max }) {
-    this._limit = max - min;
     this._pick = () => Math.floor(Math.random() * (max - min)) + 1 + min;
-    this._used = new Set();
   }
 
-  getPort() {
-    if (this._limit <= this._used.size)
-      throw new Error("No more ports available!");
-
+  async getPort() {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const port = this._pick();
-      if (this._used.has(port)) {
-        continue;
-      }
+      const err = await this._check(port);
+      if (err) continue;
 
-      this._used.add(port);
       return port;
     }
+  }
+
+  async _check(port) {
+    return new Promise(resolve => {
+      const sock = dgram.createSocket("udp4");
+      sock.once("error", resolve);
+      sock.once("listening", () => {
+        sock.close();
+        resolve(null);
+      });
+      sock.bind(port);
+    });
   }
 }
 

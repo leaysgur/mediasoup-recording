@@ -55,7 +55,7 @@ module.exports = async (fastify, options, done) => {
     const router = mediasoup.getRouter(routerId);
     if (!router) throw new Error(`router with id "${routerId}" not found`);
 
-    const recordPort = port.getPort();
+    const recordPort = await port.getPort();
     await record.createProducerItems(router, producerId, {
       serverIp: $config.mediasoup.serverIp,
       recordDir: $config.record.recordDir,
