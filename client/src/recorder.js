@@ -3,55 +3,45 @@ export default class Record {
     this._url = serverUrl;
   }
 
-  async getCapabilities() {
-    console.warn("recorder.getCapabilities()");
-    const routerRtpCapabilities = await this._fetch("/record/capabilities", {
-      method: "GET"
-    });
-    return routerRtpCapabilities;
+  async initialize() {
+    console.warn("recorder.initialize()");
+    const routerInfo = await this._fetch("/record/initialize", {});
+    return routerInfo;
   }
 
-  async createTransport() {
+  async createTransport(body) {
     console.warn("recorder.createTransport()");
-    const transportInfo = await this._fetch("/record/transport/create", {
-      method: "POST"
-    });
+    const transportInfo = await this._fetch("/record/transport/create", body);
     return transportInfo;
   }
 
   async connectTransport(body) {
     console.warn("recorder.connectTransport()", body);
-    await this._fetch("/record/transport/connect", {
-      method: "POST",
-      body
-    });
+    await this._fetch("/record/transport/connect", body);
     return null;
   }
 
   async produce(body) {
     console.warn("recorder.produce()", body);
-    const res = await this._fetch("/record/produce", {
-      method: "POST",
-      body
-    });
+    const res = await this._fetch("/record/produce", body);
     return res;
   }
 
   async start(body) {
     console.warn("recorder.start()", body);
-    await this._fetch("/record/start", {
-      method: "POST",
-      body
-    });
+    await this._fetch("/record/start", body);
     return null;
   }
 
-  async _fetch(url, options) {
-    if ("body" in options) {
-      options.body = JSON.stringify(options.body);
-    }
+  async _fetch(path, body) {
+    const res = await fetch(`${this._url}${path}`, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify(body)
+    });
 
-    const res = await fetch(`${this._url}${url}`, options);
     const json = await res.json();
 
     if (json.error) {

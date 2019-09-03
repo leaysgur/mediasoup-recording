@@ -3,7 +3,7 @@ import { Device } from "mediasoup-client";
 export default class Client {
   constructor(recorder) {
     this._recorder = recorder;
-    this._device = null;
+    this._routerId = null;
     this._counter = {
       transport: 0,
       producer: 0
@@ -16,33 +16,37 @@ export default class Client {
   }
 
   async start(track, { tNum, pNum }) {
-    if (this._device === null) {
-      await this._setupDevice();
-    }
-
     for (let i = 0; i < tNum; i++) {
-      const sendTransport = await this._createSendTransport();
+      const device = await this._createDevice();
+      const sendTransport = await this._createSendTransport(device);
       for (let j = 0; j < pNum; j++) {
         const producer = await sendTransport.produce({ track });
-        await this._recorder.start({ producerId: producer.id });
+        await this._recorder.start({
+          producerId: producer.id,
+          routerId: this._routerId
+        });
       }
     }
   }
 
-  async _setupDevice() {
-    this._device = new Device();
+  async _createDevice() {
+    const device = new Device();
 
-    const routerRtpCapabilities = await this._recorder.getCapabilities();
-    await this._device.load({ routerRtpCapabilities });
+    const { id, rtpCapabilities } = await this._recorder.initialize();
+    await device.load({ routerRtpCapabilities: rtpCapabilities });
+    this._routerId = id;
 
-    console.warn(routerRtpCapabilities);
+    console.warn(`Router: ${id}`, rtpCapabilities);
+    return device;
   }
 
-  async _createSendTransport() {
-    const transportInfo = await this._recorder.createTransport();
+  async _createSendTransport(device) {
+    const transportInfo = await this._recorder.createTransport({
+      routerId: this._routerId
+    });
 
     transportInfo.iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
-    const sendTransport = this._device.createSendTransport(transportInfo);
+    const sendTransport = device.createSendTransport(transportInfo);
 
     sendTransport.on(
       "connect",
