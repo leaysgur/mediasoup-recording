@@ -1,5 +1,4 @@
 const spawnGStreamer = require("../gstreamer");
-const { pickNumberFromRange } = require("../utils");
 
 class RecordService {
   constructor() {
@@ -78,7 +77,7 @@ class RecordService {
   async createProducerItems(
     router,
     producerId,
-    { serverIp, recMinPort, recMaxPort, recordDir }
+    { serverIp, recordDir, recordPort }
   ) {
     const producerItem = this._producerItems.get(producerId);
     if (!producerItem)
@@ -88,9 +87,7 @@ class RecordService {
       listenIp: serverIp
     });
 
-    // TODO: strict
-    const remotePort = pickNumberFromRange(recMinPort, recMaxPort);
-    await rtpTransport.connect({ ip: serverIp, port: remotePort });
+    await rtpTransport.connect({ ip: serverIp, port: recordPort });
 
     console.log("rtpTransport created on", rtpTransport.tuple);
 

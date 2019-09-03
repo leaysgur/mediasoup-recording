@@ -1,7 +1,7 @@
 module.exports = async (fastify, options, done) => {
   const {
     $config,
-    $service: { mediasoup, record }
+    $service: { mediasoup, record, port }
   } = fastify;
 
   fastify.post("/record/initialize", async () => {
@@ -55,13 +55,15 @@ module.exports = async (fastify, options, done) => {
     const router = mediasoup.getRouter(routerId);
     if (!router) throw new Error(`router with id "${routerId}" not found`);
 
+    const recordPort = port.getPort();
     await record.createProducerItems(router, producerId, {
       serverIp: $config.mediasoup.serverIp,
-      recMinPort: $config.record.recMinPort,
-      recMaxPort: $config.record.recMaxPort,
-      recordDir: $config.record.recordDir
+      recordDir: $config.record.recordDir,
+      recordPort
     });
-    console.log(`producer with id ${producerId} is recording...`);
+    console.log(
+      `producer with id ${producerId} is recording on port: ${recordPort}...`
+    );
 
     return {};
   });
