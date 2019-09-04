@@ -80,7 +80,7 @@ class RecordService {
   async createProducerItems(
     router,
     producerId,
-    { serverIp, recordDir, recordPort }
+    { serverIp, recordDir, gstSinkOptions, recordPort }
   ) {
     const producerItem = this._producerItems.get(producerId);
     if (!producerItem)
@@ -104,6 +104,7 @@ class RecordService {
     const ps = spawnGStreamer(
       rtpTransport.tuple.remotePort,
       router.rtpCapabilities.codecs[0],
+      gstSinkOptions,
       `${recordDir}/${producerId}.ogg`
     );
     console.log("recording process spawned with pid", ps.pid);

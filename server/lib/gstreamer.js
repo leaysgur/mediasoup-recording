@@ -1,8 +1,15 @@
 const { exec } = require("child_process");
 
-module.exports = (port, codec, dest) => {
+module.exports = (port, codec, sinkSettings, dest) => {
   const clockRate = codec.clockRate;
   const pt = codec.preferredPayloadType;
+
+  let sinkArgs = `location=${dest}`;
+  if (sinkSettings) {
+    sinkArgs += ` buffer-mode=${sinkSettings.bufferMode}`;
+    sinkArgs += ` buffer-size=${sinkSettings.bufferSize}`;
+    sinkArgs += ` blocksize=${sinkSettings.blocksize}`;
+  }
 
   const cmd = "gst-launch-1.0";
   const opts = [
@@ -14,7 +21,7 @@ module.exports = (port, codec, dest) => {
     // "autoaudiosink"
     "opusparse",
     "oggmux",
-    `filesink location=${dest}`
+    `filesink ${sinkArgs}`
   ].join(" ! ");
 
   console.log(`record rtp:${port} => ${dest}`);

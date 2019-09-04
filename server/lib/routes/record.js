@@ -60,6 +60,7 @@ module.exports = async (fastify, options, done) => {
     await record.createProducerItems(router, producerId, {
       serverIp: $config.mediasoup.serverIp,
       recordDir: $config.record.recordDir,
+      gstSinkOptions: $config.record.gstreamer,
       recordPort
     });
     console.log(

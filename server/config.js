@@ -16,6 +16,12 @@ module.exports = {
     ]
   },
   record: {
+    // https://gstreamer.freedesktop.org/documentation/coreelements/filesink.html
+    // gstreamer: {
+    //   bufferMode: 0,
+    //   bufferSize: 65536,
+    //   blocksize: 4096
+    // },
     recMinPort: 4001,
     recMaxPort: 5000,
     recordDir: "./record"
