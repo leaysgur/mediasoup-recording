@@ -8,6 +8,13 @@ class RecordService {
     this._producerItems = new Map();
   }
 
+  get stats() {
+    return {
+      transports: this._transports.size,
+      producers: this._producerItems.size
+    };
+  }
+
   async createTransport(router, serverIp) {
     const transport = await router.createWebRtcTransport({
       listenIps: [{ ip: serverIp }]

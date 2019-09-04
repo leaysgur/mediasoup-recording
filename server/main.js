@@ -30,6 +30,9 @@ const PortService = require("./lib/service/port");
   fastify.decorate("$service", service);
 
   fastify.register(recordRoute);
+  fastify.get("/stats", async () => {
+    return service.record.stats;
+  });
 
   fastify.listen(
     config.rest.serverPort,
