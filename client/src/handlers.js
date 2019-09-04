@@ -25,7 +25,4 @@ export const onClickRecStart = async (state, _, { tNum, pNum }) => {
   const { client, track } = state;
 
   await client.start(track, { tNum, pNum });
-
-  const { transport, producer } = client.counter;
-  console.log(`Total: ${transport} transport(s) + ${producer} producer(s)`);
 };

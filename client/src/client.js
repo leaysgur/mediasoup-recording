@@ -4,15 +4,6 @@ export default class Client {
   constructor(recorder) {
     this._recorder = recorder;
     this._routerId = null;
-    this._counter = {
-      transport: 0,
-      producer: 0
-    };
-  }
-
-  get counter() {
-    const { transport, producer } = this._counter;
-    return { transport, producer };
   }
 
   async start(track, { tNum, pNum }) {
@@ -58,7 +49,6 @@ export default class Client {
             dtlsParameters
           });
           callback();
-          this._counter.transport++;
         } catch (err) {
           errback(err);
         }
@@ -75,7 +65,6 @@ export default class Client {
             rtpParameters
           });
           callback({ id });
-          this._counter.producer++;
         } catch (err) {
           console.error(err);
           errback(err);
