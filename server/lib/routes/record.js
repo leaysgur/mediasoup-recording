@@ -1,7 +1,9 @@
+const pickPort = require("pick-port");
+
 module.exports = async (fastify, options, done) => {
   const {
     $config,
-    $service: { mediasoup, record, port }
+    $service: { mediasoup, record }
   } = fastify;
 
   fastify.post("/record/initialize", async () => {
@@ -56,7 +58,10 @@ module.exports = async (fastify, options, done) => {
     const router = mediasoup.getRouter(routerId);
     if (!router) throw new Error(`router with id "${routerId}" not found`);
 
-    const recordPort = await port.getPort();
+    const recordPort = await pickPort({
+      minPort: $config.record.recMinPort,
+      maxPort: $config.record.recMaxPort
+    });
     await record.createProducerItems(router, producerId, {
       serverIp: $config.mediasoup.serverIp,
       recordDir: $config.record.recordDir,

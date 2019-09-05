@@ -5,7 +5,6 @@ const config = require("./config");
 const recordRoute = require("./lib/routes/record");
 const MediaSoupService = require("./lib/service/mediasoup");
 const RecordService = require("./lib/service/record");
-const PortService = require("./lib/service/port");
 
 (async () => {
   // ensure directory exists
@@ -13,11 +12,7 @@ const PortService = require("./lib/service/port");
 
   const service = {
     mediasoup: new MediaSoupService(),
-    record: new RecordService(),
-    port: new PortService({
-      min: config.record.recMinPort,
-      max: config.record.recMaxPort
-    })
+    record: new RecordService()
   };
 
   await service.mediasoup.initialize(config.mediasoup);
